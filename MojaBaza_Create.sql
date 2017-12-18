@@ -177,76 +177,8 @@ IF EXISTS (SELECT 1
 
 
 GO
-IF EXISTS (SELECT 1
-           FROM   [master].[dbo].[sysdatabases]
-           WHERE  [name] = N'$(DatabaseName)')
-    BEGIN
-        ALTER DATABASE [$(DatabaseName)]
-            SET AUTO_CREATE_STATISTICS ON(INCREMENTAL = OFF),
-                MEMORY_OPTIMIZED_ELEVATE_TO_SNAPSHOT = OFF,
-                DELAYED_DURABILITY = DISABLED 
-            WITH ROLLBACK IMMEDIATE;
-    END
-
-
-GO
-IF EXISTS (SELECT 1
-           FROM   [master].[dbo].[sysdatabases]
-           WHERE  [name] = N'$(DatabaseName)')
-    BEGIN
-        ALTER DATABASE [$(DatabaseName)]
-            SET QUERY_STORE (QUERY_CAPTURE_MODE = ALL, DATA_FLUSH_INTERVAL_SECONDS = 900, INTERVAL_LENGTH_MINUTES = 60, MAX_PLANS_PER_QUERY = 200, CLEANUP_POLICY = (STALE_QUERY_THRESHOLD_DAYS = 367), MAX_STORAGE_SIZE_MB = 100) 
-            WITH ROLLBACK IMMEDIATE;
-    END
-
-
-GO
-IF EXISTS (SELECT 1
-           FROM   [master].[dbo].[sysdatabases]
-           WHERE  [name] = N'$(DatabaseName)')
-    BEGIN
-        ALTER DATABASE [$(DatabaseName)]
-            SET QUERY_STORE = OFF 
-            WITH ROLLBACK IMMEDIATE;
-    END
-
-
-GO
-IF EXISTS (SELECT 1
-           FROM   [master].[dbo].[sysdatabases]
-           WHERE  [name] = N'$(DatabaseName)')
-    BEGIN
-        ALTER DATABASE SCOPED CONFIGURATION SET MAXDOP = 0;
-        ALTER DATABASE SCOPED CONFIGURATION FOR SECONDARY SET MAXDOP = PRIMARY;
-        ALTER DATABASE SCOPED CONFIGURATION SET LEGACY_CARDINALITY_ESTIMATION = OFF;
-        ALTER DATABASE SCOPED CONFIGURATION FOR SECONDARY SET LEGACY_CARDINALITY_ESTIMATION = PRIMARY;
-        ALTER DATABASE SCOPED CONFIGURATION SET PARAMETER_SNIFFING = ON;
-        ALTER DATABASE SCOPED CONFIGURATION FOR SECONDARY SET PARAMETER_SNIFFING = PRIMARY;
-        ALTER DATABASE SCOPED CONFIGURATION SET QUERY_OPTIMIZER_HOTFIXES = OFF;
-        ALTER DATABASE SCOPED CONFIGURATION FOR SECONDARY SET QUERY_OPTIMIZER_HOTFIXES = PRIMARY;
-    END
-
-
-GO
 IF fulltextserviceproperty(N'IsFulltextInstalled') = 1
     EXECUTE sp_fulltext_database 'enable';
-
-
-GO
-PRINT N'Creating [dbo].[Osobe]...';
-
-
-GO
-CREATE TABLE [dbo].[Osobe] (
-    [id]      INT            IDENTITY (1, 1) NOT NULL,
-    [ime]     NVARCHAR (150) NULL,
-    [prezime] NVARCHAR (150) NULL,
-    [grad]    NVARCHAR (150) NULL,
-    [opis]    NVARCHAR (150) NULL,
-    [slika]   NVARCHAR (MAX) NULL,
-    [brojevi] NVARCHAR (MAX) NULL,
-    PRIMARY KEY CLUSTERED ([id] ASC)
-);
 
 
 GO
@@ -277,6 +209,23 @@ CREATE TABLE [dbo].[Brojevi] (
 
 
 GO
+PRINT N'Creating [dbo].[Osobe]...';
+
+
+GO
+CREATE TABLE [dbo].[Osobe] (
+    [id]      INT            IDENTITY (1, 1) NOT NULL,
+    [ime]     NVARCHAR (150) NULL,
+    [prezime] NVARCHAR (150) NULL,
+    [grad]    NVARCHAR (150) NULL,
+    [opis]    NVARCHAR (150) NULL,
+    [slika]   NVARCHAR (MAX) NULL,
+    [brojevi] NVARCHAR (MAX) NULL,
+    PRIMARY KEY CLUSTERED ([id] ASC)
+);
+
+
+GO
 PRINT N'Creating [dbo].[Brojevi_fk1]...';
 
 
@@ -295,23 +244,74 @@ ALTER TABLE [dbo].[Brojevi]
 
 
 GO
-PRINT N'Creating [dbo].[dohvatiOsobe]...';
+PRINT N'Creating [dbo].[napuniPodatke]...';
 
 
 GO
-CREATE PROCEDURE [dbo].[dohvatiOsobe]
+CREATE PROCEDURE [dbo].[napuniPodatke]
+	@param1 int = 0,
+	@param2 int
 AS
-	SELECT * 
-	FROM Osobe;
+	SELECT @param1, @param2
+RETURN 0
 GO
-PRINT N'Creating [dbo].[dohvatiVrste]...';
+PRINT N'Creating [dbo].[obrisiKontakt]...';
 
 
 GO
-CREATE PROCEDURE [dbo].[dohvatiVrste]
+CREATE PROCEDURE [dbo].[obrisiKontakt]
+	@id int
 AS
-	SELECT * 
-	from dbo.Vrste
+	delete from dbo.Osobe
+	where id = @id;
+
+	delete from dbo.Brojevi
+	where idOsoba = @id;
+GO
+PRINT N'Creating [dbo].[dohvatiKontakt]...';
+
+
+GO
+CREATE PROCEDURE [dbo].[dohvatiKontakt]
+	@id int
+AS
+	select * 
+	from dbo.Osobe
+	where id = @id;
+
+	select b.*, v.naziv as vrsta
+	from dbo.Brojevi as b
+	inner join dbo.Vrste as v
+	on b.idVrsta = v.id
+	where b.idOsoba = @id;
+GO
+PRINT N'Creating [dbo].[spremiBroj]...';
+
+
+GO
+CREATE PROCEDURE [dbo].[spremiBroj]
+	@id int,
+	@idOsoba int,
+	@idVrsta int,
+	@broj nvarchar(MAX),
+	@opis nvarchar(MAX)
+AS
+begin
+	if (@id = -1)
+	begin
+		insert into dbo.Brojevi (idOsoba, idVrsta, broj, opis)
+		values (@idOsoba, @idVrsta, @broj, @opis);
+	end
+	else
+	begin
+		update dbo.Brojevi
+		set idOsoba = @idOsoba,
+		idVrsta = @idVrsta,
+		broj = @broj,
+		opis = @opis
+		where id = @id
+	end
+end
 GO
 PRINT N'Creating [dbo].[spremiKontakt]...';
 
@@ -350,74 +350,23 @@ begin
 	select @id;
 end
 GO
-PRINT N'Creating [dbo].[spremiBroj]...';
+PRINT N'Creating [dbo].[dohvatiVrste]...';
 
 
 GO
-CREATE PROCEDURE [dbo].[spremiBroj]
-	@id int,
-	@idOsoba int,
-	@idVrsta int,
-	@broj nvarchar(MAX),
-	@opis nvarchar(MAX)
+CREATE PROCEDURE [dbo].[dohvatiVrste]
 AS
-begin
-	if (@id = -1)
-	begin
-		insert into dbo.Brojevi (idOsoba, idVrsta, broj, opis)
-		values (@idOsoba, @idVrsta, @broj, @opis);
-	end
-	else
-	begin
-		update dbo.Brojevi
-		set idOsoba = @idOsoba,
-		idVrsta = @idVrsta,
-		broj = @broj,
-		opis = @opis
-		where id = @id
-	end
-end
+	SELECT * 
+	from dbo.Vrste
 GO
-PRINT N'Creating [dbo].[obrisiKontakt]...';
+PRINT N'Creating [dbo].[dohvatiOsobe]...';
 
 
 GO
-CREATE PROCEDURE [dbo].[obrisiKontakt]
-	@id int
+CREATE PROCEDURE [dbo].[dohvatiOsobe]
 AS
-	delete from dbo.Osobe
-	where id = @id;
-
-	delete from dbo.Brojevi
-	where idOsoba = @id;
-GO
-PRINT N'Creating [dbo].[dohvatiKontakt]...';
-
-
-GO
-CREATE PROCEDURE [dbo].[dohvatiKontakt]
-	@id int
-AS
-	select * 
-	from dbo.Osobe
-	where id = @id;
-
-	select b.*, v.naziv as vrsta
-	from dbo.Brojevi as b
-	inner join dbo.Vrste as v
-	on b.idVrsta = v.id
-	where b.idOsoba = @id;
-GO
-PRINT N'Creating [dbo].[napuniPodatke]...';
-
-
-GO
-CREATE PROCEDURE [dbo].[napuniPodatke]
-	@param1 int = 0,
-	@param2 int
-AS
-	SELECT @param1, @param2
-RETURN 0
+	SELECT * 
+	FROM Osobe;
 GO
 DECLARE @VarDecimalSupported AS BIT;
 

@@ -1,4 +1,5 @@
-﻿var gulp = require('gulp');
+﻿/// <binding BeforeBuild='notyCopy' />
+var gulp = require('gulp');
 
 var notySrc = [
     'node_modules/noty/index.d.ts'
