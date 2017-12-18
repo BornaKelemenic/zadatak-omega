@@ -1,0 +1,93 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<br /><br />
+<table id="mojaTablica" class="table table-striped table-bordered table-hover"></table>
+
+<button type="button" class="btn btn-success" onclick="Index.upaliFormu(-1)">Dodaj novog kontakta</button>
+<button type="button" class="btn btn-info" onclick="Index.ugasiFormu()">Sakri formu</button>
+
+<br /><br />
+
+<form id="kontaktForma">
+    <div class="form-group">
+        <input type="text" name="id" hidden />
+
+        <label for="ime">Ime:</label><br />
+        <input type="text" name="ime" class="form-control" data-rule-required="true" placeholder="Ime kontakta" /><br />
+
+        <label for="prezime">Prezime:</label><br />
+        <input type="text" name="prezime" class="form-control" data-rule-required="true" placeholder="Prezime kontakta" /><br />
+
+        <label for="grad">Grad:</label><br />
+        <input type="text" name="grad" class="form-control" placeholder="Grad stanovanja" />
+
+        <label for="opis">Opis:</label><br />
+        <input type="text" name="opis" class="form-control" placeholder="Opis kontakta" />
+
+        <label for="slika">Slika:</label><br />
+        <input type="text" name="slika" class="form-control" placeholder="Slika kontakta" onblur="Index.prikaziSliku()" />
+        <div class="help-block">
+            <img id="previewSlika" src="" alt="Greška pri učitavanju slike." hidden />
+        </div>
+
+        <label for="brojevi">Brojevi:</label>
+        <br />
+        <div id="unos-brojeva">
+            <!-- Ovdje će ići unos brojeva -->
+        </div>
+
+        <button class="btn btn-success" type="button" id="addBrojBtn"> + </button>
+
+        <div class="pull-right">
+            <button type="button" class="btn btn-success" onclick="Index.dohvatiPodatkeForme()">Spremi</button>
+        </div>
+    </div>
+</form>
+
+<script>
+    Index.start();
+</script>
+
+<div id="template" hidden>
+    <div class="row" style="margin-bottom: 1em">
+        <input type="text" name="idBroj" hidden value="-1" />
+        <div class="col-sm-3">
+            <select class="form-control" name="vrsta"></select>
+        </div>
+        <div class="col-sm-4"><input type="text" name="broj" data-rule-required="true" data-rule-number="true" class="form-control" placeholder="Broj telefona" /></div>
+        <div class="col-sm-4"><input type="text" name="opisBroj" class="form-control" placeholder="Opis" /></div>
+        <div class="col-sm-1"><button onclick="Index.izbrisiRedak(this)" class="btn btn-danger" type="button">X</button></div>
+    </div>
+</div>
+
+<div class="shadow" hidden>
+    <div class="panel panel-primary" id="modal">
+        <div class="panel-heading">
+            <img id="modalSlika" alt="Slika" onerror="$('#modalSlika').attr('src', 'https://cdn1.iconfinder.com/data/icons/image-manipulations/100/13-512.png');">
+            <h4 id="modalIme" class="panel-title">Ime prezime</h4>
+            <h6 id="modalGrad" class="panel-title">grad</h6>
+        </div>
+        <div class="panel-body" id="modalOpis">
+            opis
+        </div>
+        <div class="panel-footer">
+            <div>
+                <h6>Brojevi:</h6>
+                <ul class="list-group" id="modalBrojeviLista">
+                    
+                </ul>
+            </div>
+        </div>
+        <button type="button" class="btn btn-primary" onclick="$('.shadow').hide()">Zatvori</button>
+    </div>
+</div>
+
+<div id="brojeviTemplate" hidden>
+    <li class="list-group-item" name="modalListItem">
+        <span class="glyphicon glyphicon-phone"></span><h4 style="display: inline-block;">[tip]</h4>
+        <p style="display: inline-block;">[broj]</p>
+        <p>[opisBroj]</p>
+    </li>
+</div>

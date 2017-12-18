@@ -1,0 +1,5 @@
+﻿CREATE TABLE [dbo].[Vrste]
+(
+	[id] INT NOT NULL PRIMARY KEY IDENTITY, 
+    [naziv] NVARCHAR(150) NOT NULL
+)
