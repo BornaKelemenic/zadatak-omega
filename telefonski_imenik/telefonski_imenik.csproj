@@ -13,7 +13,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Remove="Views\Home\Contact.ts" />
     <None Remove="Views\Home\Index.ts" />
     <None Remove="Views\Home\Models.ts" />
   </ItemGroup>
@@ -31,7 +30,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <TypeScriptCompile Include="Views\Home\Contact.ts" />
     <TypeScriptCompile Include="Views\Home\Index.ts" />
     <TypeScriptCompile Include="Views\Home\Models.ts" />
   </ItemGroup>
