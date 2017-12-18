@@ -1,6 +1,6 @@
 INSERT INTO dbo.Vrste (naziv)
-VALUES 'Mobitel';
+VALUES ('Mobitel');
 INSERT INTO dbo.Vrste (naziv)
-VALUES 'Fiksni';
+VALUES ('Fiksni');
 INSERT INTO dbo.Vrste (naziv)
-VALUES 'Posao';
+VALUES ('Posao');
