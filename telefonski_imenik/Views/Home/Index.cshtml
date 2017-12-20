@@ -1,16 +1,20 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Kontakti";
 }
 
 <br /><br />
+<!-- DataTablica za prikaz kontakata -->
 <table id="mojaTablica" class="table table-striped table-bordered table-hover"></table>
 
+<!-- Gumb za otvaranje forme za unos novog kontakta -->
 <button type="button" class="btn btn-success" onclick="Index.upaliFormu(-1)">Dodaj novog kontakta</button>
+<!-- Gumb za sakrivanje forme za unos novog kontakta -->
 <button type="button" class="btn btn-info" onclick="Index.ugasiFormu()">Sakri formu</button>
 
 <br /><br />
 
-<form id="kontaktForma">
+<!-- Forma za unos novog kontakta -->
+<form id="kontaktForma" hidden>
     <div class="form-group">
         <input type="text" name="id" hidden />
 
@@ -38,56 +42,81 @@
             <!-- Ovdje će ići unos brojeva -->
         </div>
 
+        <!-- Gumb za dodavanje novog retka za unos broja -->
         <button class="btn btn-success" type="button" id="addBrojBtn"> + </button>
 
         <div class="pull-right">
+            <!-- Gumb za spremanje kontakta -->
             <button type="button" class="btn btn-success" onclick="Index.dohvatiPodatkeForme()">Spremi</button>
         </div>
     </div>
 </form>
 
 <script>
+    // Pozovi start funkciju
     Index.start();
 </script>
 
+<!-- Template za unos brojeva -->
 <div id="template" hidden>
     <div class="row" style="margin-bottom: 1em">
+        <!-- Skriveno polje za idBroja -->
         <input type="text" name="idBroj" hidden value="-1" />
         <div class="col-sm-3">
+            <!-- Select za vrstu broja-->
             <select class="form-control" name="vrsta"></select>
         </div>
-        <div class="col-sm-4"><input type="text" name="broj" data-rule-required="true" data-rule-number="true" class="form-control" placeholder="Broj telefona" /></div>
-        <div class="col-sm-4"><input type="text" name="opisBroj" class="form-control" placeholder="Opis" /></div>
-        <div class="col-sm-1"><button onclick="Index.izbrisiRedak(this)" class="btn btn-danger" type="button">X</button></div>
+        <div class="col-sm-4">
+            <!-- Input polje za broj -->
+            <input type="text" name="broj" data-rule-required="true" data-rule-number="true" class="form-control" placeholder="Broj telefona" />
+        </div>
+        <div class="col-sm-4">
+            <!-- Input polje za opis broja -->
+            <input type="text" name="opisBroj" class="form-control" placeholder="Opis" />
+        </div>
+        <div class="col-sm-1">
+            <!-- Gumb za brisanje retka unosa broja -->
+            <button onclick="Index.izbrisiRedak(this)" class="btn btn-danger" type="button">X</button>
+        </div>
     </div>
 </div>
 
+<!-- Modal za prikaz detalja o kontaktu -->
 <div class="shadow" hidden>
     <div class="panel panel-primary" id="modal">
         <div class="panel-heading">
+            <!-- Slika kontakta -->
             <img id="modalSlika" alt="Slika" onerror="$('#modalSlika').attr('src', 'https://cdn1.iconfinder.com/data/icons/image-manipulations/100/13-512.png');">
+            <!-- Ispis imena kontakta -->
             <h4 id="modalIme" class="panel-title">Ime prezime</h4>
+            <!-- Ispis grada kontakta -->
             <h6 id="modalGrad" class="panel-title">grad</h6>
         </div>
+        <!-- Opis kontakta -->
         <div class="panel-body" id="modalOpis">
             opis
         </div>
         <div class="panel-footer">
             <div>
                 <h6>Brojevi:</h6>
-                <ul class="list-group" id="modalBrojeviLista">
-                    
-                </ul>
+                <!-- Lista brojeva koje ima kontakt -->
+                <ul class="list-group" id="modalBrojeviLista"></ul>
             </div>
         </div>
+        <!-- Gumb za zatvaranje modala -->
         <button type="button" class="btn btn-primary" onclick="$('.shadow').hide()">Zatvori</button>
     </div>
 </div>
 
+<!-- Template za brojeve u modalu -->
 <div id="brojeviTemplate" hidden>
+    <!-- Red koji će se kopirati u listu brojeva u modalu -->
     <li class="list-group-item" name="modalListItem">
+        <!-- Ikona i ispis vrste broja -->
         <span class="glyphicon glyphicon-phone"></span><h4 style="display: inline-block;">[tip]</h4>
+        <!-- Broj -->
         <p style="display: inline-block;">[broj]</p>
+        <!--Opis broja  -->
         <p>[opisBroj]</p>
     </li>
 </div>

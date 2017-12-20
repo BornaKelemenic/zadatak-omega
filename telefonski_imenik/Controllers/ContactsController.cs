@@ -64,16 +64,16 @@ namespace telefonski_imenik.Controllers
         [Route("/api/spremiKontakt"), HttpPost]
         public int spremiKontakt(Kontakt kontakt)
         {
-            int idOsoba = -2;
+            int idOsoba = -1;
             string sviBrojevi = "";
 
-            if (kontakt.brojevi != null)
+            if (kontakt.brojevi != null) // Ako postoje vrijednosti u brojevi array-u
             {
                 int n = kontakt.brojevi.Length;
                 int i = 0;
                 foreach (var broj in kontakt.brojevi)
                 {
-                    if (i == n - 1)
+                    if (i == n - 1) // Ako je zadnji broj, ne dodaje se zarez
                     {
                         sviBrojevi += broj.broj;
                     }
@@ -86,6 +86,7 @@ namespace telefonski_imenik.Controllers
 
             using (myConnection)
             {
+                // U idOsoba varijablu se sprema id spremljene osobe
                 idOsoba = myConnection.QueryFirstOrDefault<int>("dbo.spremiKontakt", new
                 {
                     id = kontakt.osoba.id,
@@ -97,9 +98,9 @@ namespace telefonski_imenik.Controllers
                     brojeviJSON = sviBrojevi
                 }, commandType: CommandType.StoredProcedure);
 
-                if (kontakt.brojevi != null)
+                if (kontakt.brojevi != null) // Ako postoje vrijednosti u brojevi array-u
                 {
-                    foreach (var broj in kontakt.brojevi)
+                    foreach (var broj in kontakt.brojevi) // Za svaki broj spremi podatke za brojeve sa od prije dohvaćenim id-jem osobe
                     {
                         myConnection.Execute("dbo.spremiBroj", new
                         {
@@ -111,13 +112,13 @@ namespace telefonski_imenik.Controllers
                         }, commandType: CommandType.StoredProcedure);
                     }
                 }
-                else
+                else // Ako nema vrijednosti u .brojevi znači da su pobrisani
                 {
                     myConnection.Execute("DELETE FROM dbo.Brojevi WHERE idOsoba = " + idOsoba, new { }, commandType: CommandType.Text);
                 }
             }
 
-            return idOsoba;
+            return idOsoba; // Vraća se id osobe koja je bila kreirana ili uređena (za testiranje)
         }
 
         [Route("/api/osoba/{id}")]
@@ -125,6 +126,7 @@ namespace telefonski_imenik.Controllers
         {
             using (myConnection)
             {
+                // Dohvati kontakt po id-u
                 using (var k = myConnection.QueryMultiple("dbo.dohvatiKontakt", new { id = id }, commandType: CommandType.StoredProcedure))
                 {
                     Osobe osoba = k.ReadSingle<Osobe>();
@@ -135,7 +137,7 @@ namespace telefonski_imenik.Controllers
                         osoba = osoba,
                         brojevi = brojevi
                     };
-
+                    // Vrati podatke o kontaktu
                     return kontakt;
                 }
             }
@@ -150,6 +152,8 @@ namespace telefonski_imenik.Controllers
             }
         }
     }
+
+    // Modeli
 
     public class Kontakt
     {
